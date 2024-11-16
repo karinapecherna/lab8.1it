@@ -1,76 +1,143 @@
-﻿#define _CRT_SECURE_NO_WARNINGS 
+﻿
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
-#include <cstring> 
+#include <fstream>
+#include <string>
 using namespace std;
-
-
-int Count(char* str_s) {
-    if (strlen(str_s) < 3) {
-        return 0; 
+void CreateTXT(char* fname) // створення файлу з введених рядків
+{
+    ofstream fout(fname); // відкрили файл для запису
+    char ch; // відповідь користувача – чи продовжувати введення
+    string s; // введений користувачем рядок
+    do
+    {
+        cin.get(); // очищуємо буфер клавіатури – щоб не було символу
+        cin.sync(); // "кінець рядка", який залишився після вводу числа
+        cout << "enter line: "; getline(cin, s); // ввели рядок
+        fout << s << endl; // записали його у файл
+        cout << "continue? (y/n): "; cin >> ch;
+    } while (ch == 'y' || ch == 'Y');
+    cout << endl;
+}
+void PrintTXT(char* fname) // виведення файлу на екран
+{
+    ifstream fin(fname); // відкрили файл для зчитування
+    string s; // прочитаний рядок
+    while (getline(fin, s)) // поки можна прочитати рядок
+    {
+        cout << s << endl; // виводимо його на екран
     }
-    int k = 0;
-    for (int i = 0; str_s[i + 2] != 0; i++) {
-        if ((str_s[i] == 'O' && str_s[i + 1] == 'G' && str_s[i + 2] == 'O') ||
-            (str_s[i] == 'A' && str_s[i + 1] == 'G' && str_s[i + 2] == 'A')) {
-            k++; 
+    cout << endl;
+}
+int ProcessTXT1(char* fname) // обчислення загальної кількості символів + - =
+{
+   ifstream fin(fname); // відкрили файл для зчитування
+    string s; // прочитаний рядок
+    int k = 0; // загальна кількість символів + - =
+    while (getline(fin, s)) // поки можна прочитати рядок
+    { // скануємо його і обчислюємо кількість + - =
+        for (unsigned i = 0; i < s.length(); i++)
+            if ((s[i] == 'O' && s[i + 1] == 'G' && s[i + 2] == 'O') ||
+                (s[i] == 'A' && s[i + 1] == 'G' && s[i + 2] == 'A'))
+                k++;
+    }
+    return k;
+}
+int ProcessTXT2(char* fname) // обчислення кількості слів,
+{ // відокремлених пробілами
+    ifstream fin(fname); // відкрили файл для зчитування
+    string s; // прочитане слово
+    int k = 0; // кількість слів
+    
+        while (fin >> s) // поки можна прочитати слово
+        {
+            k++; // збільшили кількість і вивели його на екран
+            cout << k << ": " << s << endl;
+        }
+    return k;
+}
+int ProcessTXT3(char* fname) // обчислення кількості слів,
+{ // відокремлених пробілами та знаками пунктуації
+    ifstream fin(fname); // відкрили файл для зчитування
+    char s[100]; // прочитаний рядок
+    char* w; // виокремлене з рядка слово
+    int k = 0; // кількість слів
+    while (fin.getline(s, sizeof(s))) // поки можна прочитати рядок
+    {
+        w = strtok(s, " .,:;!?-'"); // початок циклу виокремлення слів
+        while (w != NULL) // поки можна виокремити слово
+        {
+            k++; // збільшуємо лічильник слів
+            cout << k << ": " << w << endl; // виводимо слово
+            w = strtok(NULL, " .,:;!?-'"); // виокремлюємо наступне слово
         }
     }
     return k;
 }
-
-
-char* Change(char* str_s) {
-    size_t len = strlen(str_s);
-    if (len < 3) {
-        return str_s;
-    }
-    
-    char* tmp = new char[len * 2 + 1]; 
-    char* t = tmp; 
-    tmp[0] = '\0'; 
-    size_t i = 0;
-
-   
-    while (i < len && str_s[i + 2] != 0) {
-        if ((str_s[i] == 'O' && str_s[i + 1] == 'G' && str_s[i + 2] == 'O') ||
-            (str_s[i] == 'A' && str_s[i + 1] == 'G' && str_s[i + 2] == 'A')) {
-            strcat(t, "**"); 
-            t += 2; 
-            i += 3; 
+void SortTXT(char* fname, char* gname) // сортування рядків текстового файлу
+{
+    ofstream g(gname); // відкрили другий файл для запису
+    string s, mins, z = ""; // s – прочитаний з файлу f рядок
+    // mins – рядок, який вважається
+    // найменшим
+   // z - записаний у файл g рядок
+    int k; // - вказує, чи є ще рядки, які слід
+    // записати у файл g
+    do // цикл запису мінімального рядка
+    { // з тих, які ще не записані у файл g
+        k = 0; // обнуляємо лічильник рядків,
+        // які слід записати
+        ifstream f(fname); // відкрили перший файл для зчитування
+        // тепер будемо читати файл з початку
+        // цикл початку пошуку мінімального із ще не записаних рядків
+        while (getline(f, s)) // поки можна зчитувати рядки
+        {
+            if (s <= z) // якщо цей рядок вже записаний у файл g
+                continue; // - пропускаємо його
+            mins = s; // вважаємо перший ще не записаний рядок
+            // - мінімальним
+            k++; // знайшли ще не записаний рядок
+            // - збільшили лічильник
+            break; // вийшли з циклу присвоєння змінній
+        } // mins початкового значення
+        // цикл пошуку мінімального із ще не записаних рядків
+        while (getline(f, s)) // поки можна зчитувати рядки
+        {
+            if (s <= z) // якщо цей рядок вже записаний у файл g
+                continue; // - пропускаємо його
+            if (s < mins) // якщо прочитаний рядок менший
+                
+            { // мінімального
+                mins = s; // - вважаємо його мінімальним
+                k++; // збільшили лічильник ще не записаних
+            } // рядків
         }
-        else {
-            *t++ = str_s[i++];
-            *t = '\0'; 
-        }
-    }
-
-    
-    while (i < len) {
-        *t++ = str_s[i++];
-    }
-    *t = '\0'; 
-
-    strcpy(str_s, tmp);
-    return tmp; 
+        // запис мінімального з не записаних рядків у файл g
+        z = mins; // будемо записувати знайдений
+        // мінімальний з не записаних рядків
+        if (k > 0) // якщо були знайдені ще не записані
+            g << z << endl; // рядки - записуємо мінімальний з них
+        f.close(); // закрили перший файл
+    } // щоб потім читати файл з початку
+    while (k > 0); // повторюємо, поки є не записані рядки
 }
-
-int main() {
-    char str_s[101];
-    cout << "Enter string:" << endl;
-    cin.getline(str_s, 100);
-
-    
-    cout << "String contained " << Count(str_s) << " groups of 'OGO' or 'AGA'" << endl;
-
-   
-    char* dest = new char[151];
-    dest = Change(str_s);
-
-    
-    cout << "Modified string (param) : " << str_s << endl;
-    cout << "Modified string (result): " << dest << endl;
-
-    
-    delete[] dest;
+int main()
+{
+    // text files
+    char fname[100]; // ім'я першого файлу
+    cout << "enter file name 1: "; cin >> fname;
+    CreateTXT(fname); // ввели рядки файлу з клавіатури
+    PrintTXT(fname); // вивели вміст першого файлу на екран
+    cout << "k(OGO and AGA) = " << ProcessTXT1(fname) << endl;
+    cout << "k(word1) = " << ProcessTXT2(fname) << endl;
+    cout << "k(word2) = " << ProcessTXT3(fname) << endl;
+    char gname[100]; // ім'я другого файлу
+    cout << "enter file name 2: "; cin >> gname;
+    SortTXT(fname, gname); // відсортували рядки першого файлу,
+    // результат записали у другий файл
+    PrintTXT(gname); // вивели вміст другого файлу на екран
     return 0;
 }
+
+  
+       
